@@ -1,21 +1,36 @@
 import React, { useState } from 'react';
-import { View, TextInput, Button, StyleSheet, Text } from 'react-native';
+import { View, TextInput, Button, StyleSheet, Text, Alert } from 'react-native';
 import Axios from 'axios';
 
 
-function LoginScreen() {
-  const [username, setUsername] = useState('');
+function LoginScreen({navigation}) {
+  const [userId, setUserId] = useState('');
   const [password, setPassword] = useState('');
 
-  const handleLogin = () => {
-    // 여기에 로그인 로직 구현
-    Axios.get('http://192.168.0.15:3001/login')
-      .then(res => {
-        console.log(res.data);
-        console.log(username, password);
-      })
-      .catch(error => console.log(error));
-  };
+  const handleLogin = async () => {
+        try {
+            const response = await fetch('http://172.30.1.84:3001/api/login', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    userId,
+                    password,
+                }),
+            });
+            const json = await response.json();
+            if (response.status === 200) {
+                Alert.alert('Success', json.message);
+                // 로그인 성공 후의 로직 처리
+                navigation.navigate("Home");
+            } else {
+                Alert.alert('Error', json.message);
+            }
+        } catch (error) {
+            Alert.alert('Error', '네트워크 에러가 발생했습니다.');
+        }
+    };
 
   return (
     <View style={styles.container}>
@@ -23,8 +38,8 @@ function LoginScreen() {
       <TextInput
         style={styles.input}
         placeholder="사용자 이름"
-        value={username}
-        onChangeText={setUsername}
+        value={userId}
+        onChangeText={setUserId}
       />
       <TextInput
         style={styles.input}
@@ -35,6 +50,7 @@ function LoginScreen() {
       />
       <Button title="로그인" onPress={handleLogin} />
       {/* 추가 링크나 기능이 필요하면 여기에 구현 */}
+      <Button title="회원가입" onPress={() => navigation.navigate("Join")} />
     </View>
     
   );
