@@ -1,36 +1,35 @@
 import React, { useState } from 'react';
 import { View, TextInput, Button, StyleSheet, Text, Alert } from 'react-native';
-import Axios from 'axios';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import axios from 'axios';
 
+
+const API_URL = 'http://172.30.1.84:3001/api/';
+
+axios.defaults.withCredentials = true; //쿠키사용
 
 function LoginScreen({navigation}) {
   const [userId, setUserId] = useState('');
   const [password, setPassword] = useState('');
 
-  const handleLogin = async () => {
-        try {
-            const response = await fetch('http://172.30.1.84:3001/api/login', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({
-                    userId,
-                    password,
-                }),
-            });
-            const json = await response.json();
-            if (response.status === 200) {
-                Alert.alert('Success', json.message);
-                // 로그인 성공 후의 로직 처리
-                navigation.navigate("Home");
-            } else {
-                Alert.alert('Error', json.message);
-            }
-        } catch (error) {
-            Alert.alert('Error', '네트워크 에러가 발생했습니다.');
-        }
-    };
+
+  const loginUser = async (userId, password) => {
+    try {
+      const response = await axios.post(`${API_URL}login`, { userId, password });
+      // 로그인 성공 후, 서버로부터 받은 쿠키를 저장합니다.
+      const token = response.data.token; // 서버로부터 받은 인증 토큰
+
+      // AsyncStorage에 토큰 저장
+      await AsyncStorage.setItem('user-token', token);
+      
+      console.log('로그인 성공:', response.data);
+      Alert.alert('로그인 성공');
+      navigation.navigate("Home");
+    } catch (error) {
+      console.error('로그인 실패:', error);
+    }
+  };
+
 
   return (
     <View style={styles.container}>
@@ -48,7 +47,7 @@ function LoginScreen({navigation}) {
         onChangeText={setPassword}
         secureTextEntry // 비밀번호 숨김 처리
       />
-      <Button title="로그인" onPress={handleLogin} />
+      <Button title="로그인" onPress={() => loginUser(userId, password)} />
       {/* 추가 링크나 기능이 필요하면 여기에 구현 */}
       <Button title="회원가입" onPress={() => navigation.navigate("Join")} />
     </View>

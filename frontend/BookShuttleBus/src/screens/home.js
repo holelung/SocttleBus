@@ -4,15 +4,18 @@ import { View, Text, StyleSheet, Image, TouchableOpacity, ScrollView } from 'rea
 import { AntDesign, Ionicons } from '@expo/vector-icons';
 import { StatusBar } from 'expo-status-bar';
 import LoginScreen from './loginScreen';
-
+import Axios from 'axios';
 
 
 function Home({navigation}) {
   const [route, setRoute] = useState(true);
   const [tableHead, setTableHead] = useState([]);
   const [tableData, setTableData] = useState([]);
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+
 
  useEffect(() => {
+
   const loadHead = async () => {
     try {
       const head = await AsyncStorage.getItem("head-key");
@@ -35,7 +38,15 @@ function Home({navigation}) {
     }
   };
 
+  const checkLoginStatus = async () => {
+    const token = await AsyncStorage.getItem('user-token');
+    if (token) {
+      setIsLoggedIn(true);
+    }
+  };
+
   // useEffect 내에서 함수들을 호출
+  checkLoginStatus();
   loadHead();
   loadData();
 }, []);
@@ -116,6 +127,13 @@ function Home({navigation}) {
     saveData(sinchonTableData);
   };
 
+  //로그아웃
+  const logoutUser = async () => {
+  await AsyncStorage.removeItem('user-token');
+  setIsLoggedIn(false);
+  // 로그인 화면으로 이동하거나 다른 처리를 수행합니다.
+  };
+
   return (
     <View style={styles.container}>
       <StatusBar style="dark" />
@@ -128,9 +146,9 @@ function Home({navigation}) {
       </View>
 
       <TouchableOpacity 
-        onPress={() => navigation.navigate("LoginScreen")} 
+        onPress={() => isLoggedIn ? navigation.navigate("ReservationScreen") : navigation.navigate("LoginScreen")} 
         style={styles.loginMenu}>
-        <Text style={styles.loginMenuText}>로그인</Text>
+        <Text style={styles.loginMenuText}>{isLoggedIn ? '예약하기' : '로그인'}</Text>
       </TouchableOpacity>
 
       <View style={styles.menuBox}>
@@ -173,15 +191,15 @@ function Home({navigation}) {
 
       <View style={styles.bottomNav}>
         {/* QR코드 버튼 */}
-        <TouchableOpacity>
-           <Ionicons name="qr-code" size={24} color="white" />
+        <TouchableOpacity onPress={() => navigation.navigate("QRCodeScreen")}>
+          <Ionicons name="qr-code" size={24} color="white" />
         </TouchableOpacity>
         {/** 홈 버튼 */}
-        <TouchableOpacity>
+        <TouchableOpacity  onPress={() => navigation.navigate("Home")}>
           <Ionicons name="home-outline" size={24} color="white" />
         </TouchableOpacity>
         {/** 마이페이지 버튼 */}
-        <TouchableOpacity>
+        <TouchableOpacity onPress={() => navigation.navigate("MyPage")}>
            <Ionicons name="person-outline" size={24} color="white" />
         </TouchableOpacity>
       </View>

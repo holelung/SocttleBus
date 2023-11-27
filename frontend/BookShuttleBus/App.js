@@ -9,7 +9,11 @@ import { createStackNavigator } from "@react-navigation/stack";
 import Home from "./src/screens/home";
 import LoginScreen from './src/screens/loginScreen';
 import Join from './src/screens/join';
+import MyPage from './src/screens/mypage';
+import QRCodeScreen from './src/screens/qrcode';
+
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
+import Axios from 'axios';
 
 const Stack = createNativeStackNavigator();
 
@@ -23,6 +27,8 @@ function App() {
         <Stack.Screen name="Home" component={Home}/>
         <Stack.Screen name="LoginScreen" component={LoginScreen} />
         <Stack.Screen name="Join" component={Join} />
+        <Stack.Screen name="MyPage" component={MyPage} />
+        <Stack.Screen name="QRCodeScreen" component={QRCodeScreen} />
       </Stack.Navigator>
     </NavigationContainer>
   );

@@ -2,7 +2,9 @@ const express = require("express");
 const mysql = require("mysql");
 const cors = require("cors");
 const bcrypt = require('bcrypt');
+const jwt = require('jsonwebtoken');
 
+const SECRET_KEY = 'your_secret_key'; // JWT 시크릿 키
 
 const app = express(); // express server
 
@@ -37,7 +39,7 @@ app.post('/api/join', async (req, res) => {
     });
 });
 
-
+//로그인
 app.post('/api/login', async (req, res) => {
     const { userId, password } = req.body;
     // 사용자를 찾고, 패스워드를 검증합니다.
@@ -45,14 +47,16 @@ app.post('/api/login', async (req, res) => {
         if (results.length > 0) {
             const comparison = await bcrypt.compare(password, results[0].password);
             if (comparison) {
-                return res.status(200).send({ message: '로그인 성공!' });
+                const token = jwt.sign({ username: results[0].id }, SECRET_KEY);
+                return res.status(200).json({ token, message: '로그인 성공!'});
+            } else {
+                return res.status(401).send({ message: '로그인 실패: 패스워드가 잘못되었습니다.' });
             }
         }
         if(error){
-            console.error(error);
-            return res.status(401).send({ message: '로그인 실패: 사용자 이름이나 패스워드가 잘못되었습니다.' });
+            return res.status(401).send({ message: '로그인 실패: 사용자를 찾을 수 없습니다.' });
         }
-        
+
  
     });
 });
