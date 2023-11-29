@@ -22,7 +22,7 @@ function LoginScreen({navigation}) {
       // AsyncStorage에 토큰 저장
       await AsyncStorage.setItem('user-token', token);
       
-      console.log('로그인 성공:', response.data);
+      console.log('로그인 성공:', response.data.message);
       Alert.alert('로그인 성공');
       navigation.navigate("Home");
     } catch (error) {

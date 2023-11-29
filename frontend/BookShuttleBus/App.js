@@ -11,6 +11,7 @@ import LoginScreen from './src/screens/loginScreen';
 import Join from './src/screens/join';
 import MyPage from './src/screens/mypage';
 import QRCodeScreen from './src/screens/qrcode';
+import ReservationScreen from './src/screens/reservation';
 
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import Axios from 'axios';
@@ -29,6 +30,7 @@ function App() {
         <Stack.Screen name="Join" component={Join} />
         <Stack.Screen name="MyPage" component={MyPage} />
         <Stack.Screen name="QRCodeScreen" component={QRCodeScreen} />
+        <Stack.Screen name="ReservationScreen" component={ReservationScreen} />
       </Stack.Navigator>
     </NavigationContainer>
   );

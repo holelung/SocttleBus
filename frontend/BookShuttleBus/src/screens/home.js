@@ -1,4 +1,5 @@
-import React,{ useState, useEffect} from 'react';
+import React,{ useState, useEffect, useCallback } from 'react';
+import { useFocusEffect } from '@react-navigation/native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { View, Text, StyleSheet, Image, TouchableOpacity, ScrollView } from 'react-native';
 import { AntDesign, Ionicons } from '@expo/vector-icons';
@@ -6,6 +7,7 @@ import { StatusBar } from 'expo-status-bar';
 import LoginScreen from './loginScreen';
 import Axios from 'axios';
 
+const API_URL = 'http://172.30.1.84:3001/api/';
 
 function Home({navigation}) {
   const [route, setRoute] = useState(true);
@@ -13,8 +15,23 @@ function Home({navigation}) {
   const [tableData, setTableData] = useState([]);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
 
+  useFocusEffect(
+    useCallback(() => {
+      const checkLoginStatus = async () => {
+        const token = await AsyncStorage.getItem('user-token');
+        if (token){
+          setIsLoggedIn(true);
+        }else{
+          setIsLoggedIn(false);
+        }
+      };
 
- useEffect(() => {
+      checkLoginStatus();
+    }, [])
+  );
+
+  useEffect(() => {
+  
 
   const loadHead = async () => {
     try {
@@ -40,13 +57,13 @@ function Home({navigation}) {
 
   const checkLoginStatus = async () => {
     const token = await AsyncStorage.getItem('user-token');
-    if (token) {
-      setIsLoggedIn(true);
-    }
-  };
-
+      if (token) {
+        setIsLoggedIn(true);
+      }
+    };
+  
   // useEffect 내에서 함수들을 호출
-  checkLoginStatus();
+  checkLoginStatus(); 
   loadHead();
   loadData();
 }, []);
@@ -279,7 +296,7 @@ const styles = StyleSheet.create({
 
   },
   bottomNav: {
-    flex:1,
+    flex:1.08,
     flexDirection: 'row',
     justifyContent: 'space-around',
     backgroundColor: '#0000ff',

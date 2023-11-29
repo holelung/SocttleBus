@@ -22,6 +22,7 @@ app.get("/", function (req, res) {
   res.send("안녕하세요!");
 });
 
+//회원가입
 app.post('/api/join', async (req, res) => {
     const { userId, password, name } = req.body;
     if (!userId || !password || !name) {
@@ -56,10 +57,18 @@ app.post('/api/login', async (req, res) => {
         if(error){
             return res.status(401).send({ message: '로그인 실패: 사용자를 찾을 수 없습니다.' });
         }
-
  
     });
 });
+
+app.post('/api/logout', (req, res) => {
+  // 클라이언트에게 토큰을 삭제하라는 응답을 보냅니다.
+  // 실제로는 JWT 토큰을 서버 측에서 관리하고 있다면 여기에서 블랙리스트 처리를 할 수 있습니다.
+  res.status(200).send({ message: '로그아웃 요청 받음. 클라이언트에서 토큰을 삭제해야 합니다.' });
+});
+
+
+
 
 app.listen(3001, () => {
   console.log("Server is running onn port 3001");
