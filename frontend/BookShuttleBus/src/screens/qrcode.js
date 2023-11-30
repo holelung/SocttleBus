@@ -1,7 +1,9 @@
 import React from 'react';
 import { View, Text, StyleSheet, Image, TouchableOpacity } from 'react-native';
 import { AntDesign, Ionicons } from '@expo/vector-icons';
+import axios from 'axios';
 
+// 로그인 안되있으면 진입불가 => 로그인 화면으로 이동
 const QRCodeScreen = ({ navigation }) => {
   return (
     <View style={styles.container}>
@@ -13,11 +15,13 @@ const QRCodeScreen = ({ navigation }) => {
           style={styles.qrCode}
         />
       </View>
+      {/* 회원정보 불러오기, DB에 QR,예약 여부확인 */}
       <View style={styles.infoCard}>
         <Text style={styles.userInfo}>김명준</Text>
         <Text style={styles.userInfo}>2022260000</Text>
         <Text style={styles.userInfo}>탑승 가능</Text>
       </View>
+      {/* 예약된 셔틀 시간대와 경로를 불러와야함. */}
       <View style={styles.bottomNav}>
         {/* QR코드 버튼 */}
         <TouchableOpacity onPress={() => navigation.navigate("QRCodeScreen")}>

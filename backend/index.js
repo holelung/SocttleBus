@@ -63,6 +63,7 @@ app.post('/api/login', async (req, res) => {
 
 app.post('/api/logout', (req, res) => {
   // 클라이언트에게 토큰을 삭제하라는 응답을 보냅니다.
+  
   // 실제로는 JWT 토큰을 서버 측에서 관리하고 있다면 여기에서 블랙리스트 처리를 할 수 있습니다.
   res.status(200).send({ message: '로그아웃 요청 받음. 클라이언트에서 토큰을 삭제해야 합니다.' });
 });

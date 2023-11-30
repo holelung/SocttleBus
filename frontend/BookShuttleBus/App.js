@@ -12,14 +12,20 @@ import Join from './src/screens/join';
 import MyPage from './src/screens/mypage';
 import QRCodeScreen from './src/screens/qrcode';
 import ReservationScreen from './src/screens/reservation';
+import AppContext from './src/screens/AppContext';
 
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import Axios from 'axios';
 
+
 const Stack = createNativeStackNavigator();
 
 function App() {
+
+
   return (
+     <AppContext.Provider value={'http://172.20.10.4:3001/api/'}>
+    {/* All other components are wrapped by the AppContext.Provider */}
     <NavigationContainer>
       <Stack.Navigator 
         initialRouteName="Home"
@@ -33,6 +39,7 @@ function App() {
         <Stack.Screen name="ReservationScreen" component={ReservationScreen} />
       </Stack.Navigator>
     </NavigationContainer>
+    </AppContext.Provider>
   );
 }
 

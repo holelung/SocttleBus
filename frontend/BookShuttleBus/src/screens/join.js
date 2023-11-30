@@ -1,23 +1,23 @@
-import React, { useState } from 'react';
+import React, { useState, useContext } from 'react';
 import { Text, View, TextInput, Button, Alert, StyleSheet } from 'react-native';
 import axios from 'axios';
-
-const API_URL = 'http://172.30.1.84:3001/api/';
+import AppContext from './AppContext';
 
 
 const Join = ({navigation}) => {
     const [userId, setUserId] = useState('');
     const [password, setPassword] = useState('');
     const [name, setName] = useState('');
+    const ip = useContext(AppContext);
 
     const joinUser = async (userId, password, name) => {
         try {
-            const response = await axios.post(`${API_URL}join`, {
+            const response = await axios.post(`${ip}join`, {
                 userId,
                 password,
                 name
             });
-            console.log('회원가입 성공:', response.data);
+            console.log('회원가입 성공:', response.data.message);
             // 회원가입 성공 후 처리 로직
             Alert.alert('Success');
             navigation.navigate("LoginScreen");

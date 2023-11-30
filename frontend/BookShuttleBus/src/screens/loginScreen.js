@@ -1,21 +1,20 @@
-import React, { useState } from 'react';
+import React, { useState, useContext } from 'react';
 import { View, TextInput, Button, StyleSheet, Text, Alert } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import axios from 'axios';
+import AppContext from './AppContext';
 
-
-const API_URL = 'http://172.30.1.84:3001/api/';
 
 axios.defaults.withCredentials = true; //쿠키사용
 
 function LoginScreen({navigation}) {
   const [userId, setUserId] = useState('');
   const [password, setPassword] = useState('');
-
+  const ip = useContext(AppContext);
 
   const loginUser = async (userId, password) => {
     try {
-      const response = await axios.post(`${API_URL}login`, { userId, password });
+      const response = await axios.post(`${ip}login`, { userId, password });
       // 로그인 성공 후, 서버로부터 받은 쿠키를 저장합니다.
       const token = response.data.token; // 서버로부터 받은 인증 토큰
 

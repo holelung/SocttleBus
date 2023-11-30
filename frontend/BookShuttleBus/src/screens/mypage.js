@@ -1,19 +1,22 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useContext } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { View, Text, StyleSheet, Image, TouchableOpacity, Alert} from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import axios from 'axios';
+import AppContext from './AppContext';
 
-const API_URL = 'http://172.30.1.84:3001/api/';
 
 const MyPage = ({ navigation }) => {
     const [isLoggedIn, setIsLoggedIn] = useState(false);
+    const ip = useContext(AppContext);
 
     useEffect(() => {
         const checkLoginStatus = async () => {
             const token = await AsyncStorage.getItem('user-token');
             if (token) {
-                setIsLoggedIn(true);
+              setIsLoggedIn(true);
+            }else{
+              setIsLoggedIn(false);
             }
         };
         checkLoginStatus();    
@@ -21,7 +24,7 @@ const MyPage = ({ navigation }) => {
 
     const logoutUser = async () => {
         try {
-            await axios.post(`${API_URL}logout`);
+            await axios.post(`${ip}logout`);
             await AsyncStorage.removeItem('user-token'); // 인증 토큰을 삭제합니다.
             // 로그아웃 처리 후의 로직을 실행합니다. 예를 들면 홈 화면으로 이동 등
             Alert.alert('로그아웃 되었습니다.');
@@ -41,19 +44,23 @@ const MyPage = ({ navigation }) => {
           style={styles.avatar}
           source={require('../images/profile.png')} // 아바타 이미지 경로로 변경하세요.
         />
+        {/* isLoggedIn이 true면 View띄우고 아니면 로그인 탭  */}
         <Text style={styles.nameText}>김명준 (22학번)</Text>
         <Text style={styles.idText}>2022260000</Text>
       </View>
       <View style={styles.menuContainer}>
+        {/* 로그인 했을 경우 없음 */}
         <TouchableOpacity>
             <Text style={styles.menuItem}>회원가입</Text>
         </TouchableOpacity>
+        {/* 로그아웃 되어있을 경우 없음 */}
         <TouchableOpacity>
             <Text style={styles.menuItem}>비밀번호 변경</Text>
         </TouchableOpacity>
         <TouchableOpacity>
             <Text style={styles.menuItem}>알림 설정</Text>
         </TouchableOpacity>
+        {/* 로그인이 안되있을 경우 로그인으로 변경 */}
         <TouchableOpacity onPress={() => logoutUser()}>
             <Text style={styles.menuItem}>로그아웃</Text>
         </TouchableOpacity>

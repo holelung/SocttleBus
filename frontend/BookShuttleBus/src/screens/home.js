@@ -1,13 +1,14 @@
-import React,{ useState, useEffect, useCallback } from 'react';
+import React,{ useState, useEffect, useCallback, useContext } from 'react';
 import { useFocusEffect } from '@react-navigation/native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { View, Text, StyleSheet, Image, TouchableOpacity, ScrollView } from 'react-native';
 import { AntDesign, Ionicons } from '@expo/vector-icons';
 import { StatusBar } from 'expo-status-bar';
-import LoginScreen from './loginScreen';
-import Axios from 'axios';
+import AppContext from './AppContext';
+import axios from 'axios';
 
-const API_URL = 'http://172.30.1.84:3001/api/';
+const API_URL = 'http://172.30.1.13:3001/api/';
+
 
 function Home({navigation}) {
   const [route, setRoute] = useState(true);
@@ -15,7 +16,10 @@ function Home({navigation}) {
   const [tableData, setTableData] = useState([]);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
 
+  const ip = useContext(AppContext);
+
   useFocusEffect(
+    // 로그아웃 등 다시 Home화면을 불러올때 작동
     useCallback(() => {
       const checkLoginStatus = async () => {
         const token = await AsyncStorage.getItem('user-token');
@@ -54,7 +58,7 @@ function Home({navigation}) {
       console.log(error);
     }
   };
-
+  // 로그인 체킹(첫 화면 오픈)
   const checkLoginStatus = async () => {
     const token = await AsyncStorage.getItem('user-token');
       if (token) {
@@ -128,6 +132,7 @@ function Home({navigation}) {
       console.log(error);
     }
   };
+  //DMC경로
   const first = () => {
     setRoute(true);
     setTableHead(dmcTableHead);
@@ -136,6 +141,7 @@ function Home({navigation}) {
     saveData(dmcTableData);
   };
 
+  //신촌 경로
   const second = () => {
     setRoute(false);
     setTableHead(sinchonTableHead);
