@@ -1,5 +1,6 @@
-import React, { useEffect, useState, useContext } from 'react';
+import React, { useEffect, useState, useContext, useCallback } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { useFocusEffect } from '@react-navigation/native';
 import { View, Text, StyleSheet, Image, TouchableOpacity, Alert} from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import axios from 'axios';
@@ -7,20 +8,45 @@ import AppContext from './AppContext';
 
 
 const MyPage = ({ navigation }) => {
+    const [userInfo, setUserInfo] = useState([]);
     const [isLoggedIn, setIsLoggedIn] = useState(false);
     const ip = useContext(AppContext);
 
-    useEffect(() => {
-        const checkLoginStatus = async () => {
-            const token = await AsyncStorage.getItem('user-token');
-            if (token) {
-              setIsLoggedIn(true);
-            }else{
-              setIsLoggedIn(false);
-            }
+    useFocusEffect(
+    // 로그아웃 등 다시 Home화면을 불러올때 작동
+     useCallback(() => {
+      const checkLoginStatus = async () => {
+        const token = await AsyncStorage.getItem('user-token');
+          if (token){
+            setIsLoggedIn(true);
+            // 유저 정보 전체 불러오기
+            try {
+              const response = await axios.get(`${ip}getuser`, {
+                headers: {
+                  Authorization: `Bearer ${token}` // 헤더에 토큰을 포함합니다.
+                }
+              });
+              console.log(response.data);
+              setUserInfo(response.data);
+            }catch (error){
+              console.log('Error fetching user data:', error);
+            }      
+          }else{
+            setIsLoggedIn(false);
+             Alert.alert(
+              "로그인 필요",
+              "마이페이지를 이용하려면 로그인해야합니다.",
+              [
+                { text: "뒤로가기", onPress: () => navigation.goBack() },
+                { text: "로그인", onPress: () => navigation.navigate("LoginScreen") }
+              ]
+            );
+          }
         };
-        checkLoginStatus();    
-    }, []);
+
+      checkLoginStatus();
+      }, [navigation])
+    );
 
     const logoutUser = async () => {
         try {
@@ -45,14 +71,10 @@ const MyPage = ({ navigation }) => {
           source={require('../images/profile.png')} // 아바타 이미지 경로로 변경하세요.
         />
         {/* isLoggedIn이 true면 View띄우고 아니면 로그인 탭  */}
-        <Text style={styles.nameText}>김명준 (22학번)</Text>
-        <Text style={styles.idText}>2022260000</Text>
+        <Text style={styles.nameText}>{userInfo.userName} ({userInfo.userId.slice(0,2)}학번)</Text>
+        <Text style={styles.idText}>{userInfo.userId}</Text>
       </View>
       <View style={styles.menuContainer}>
-        {/* 로그인 했을 경우 없음 */}
-        <TouchableOpacity>
-            <Text style={styles.menuItem}>회원가입</Text>
-        </TouchableOpacity>
         {/* 로그아웃 되어있을 경우 없음 */}
         <TouchableOpacity>
             <Text style={styles.menuItem}>비밀번호 변경</Text>

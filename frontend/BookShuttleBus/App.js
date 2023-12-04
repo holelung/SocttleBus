@@ -24,7 +24,7 @@ function App() {
 
 
   return (
-     <AppContext.Provider value={'http://172.20.10.4:3001/api/'}>
+     <AppContext.Provider value={'http://172.30.1.13:3001/api/'}>
     {/* All other components are wrapped by the AppContext.Provider */}
     <NavigationContainer>
       <Stack.Navigator 

@@ -16,10 +16,10 @@ CREATE TABLE Routes (
     Description TEXT
 );
 CREATE TABLE Students (
-    StudentID INT AUTO_INCREMENT PRIMARY KEY,
-    Password VARCHAR(255),
-    Name VARCHAR(100),
-    StudentNumber VARCHAR(50)
+    StudentID INT auto_increment PRIMARY KEY,
+    Password VARCHAR(255) NOT NULL,
+    Name VARCHAR(100) NOT NULL,
+    StudentNumber VARCHAR(50) NOT NULL unique
 );
 CREATE TABLE Reservations (
     ReservationID INT AUTO_INCREMENT PRIMARY KEY,

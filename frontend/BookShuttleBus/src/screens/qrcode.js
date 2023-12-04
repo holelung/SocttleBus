@@ -1,24 +1,87 @@
-import React from 'react';
-import { View, Text, StyleSheet, Image, TouchableOpacity } from 'react-native';
+import React, { useState, useEffect, useCallback, useContext } from 'react';
+import { View, Text, StyleSheet, Image, TouchableOpacity, Alert } from 'react-native';
+import { useFocusEffect, useNavigation } from '@react-navigation/native';
 import { AntDesign, Ionicons } from '@expo/vector-icons';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import axios from 'axios';
+import {QRCode, Canvas} from 'easyqrcode-react-native';
+import AppContext from './AppContext';
+
 
 // 로그인 안되있으면 진입불가 => 로그인 화면으로 이동
 const QRCodeScreen = ({ navigation }) => {
+  const [userInfo, setUserInfo] = useState([]);
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const ip = useContext(AppContext);
+
+  useFocusEffect(
+    // 로그아웃 등 다시 Home화면을 불러올때 작동
+    useCallback(() => {
+      const checkLoginStatus = async () => {
+        const token = await AsyncStorage.getItem('user-token');
+          if (token){
+            console.log(token);
+            setIsLoggedIn(true);
+            // 유저 정보 전체 불러오기
+            try {
+              const response = await axios.get(`${ip}getuser`, {
+                headers: {
+                  Authorization: `Bearer ${token}` // 헤더에 토큰을 포함합니다.
+                }
+              });
+              console.log(response.data);
+              setUserInfo(response.data);
+            }catch (error){
+              console.log('Error fetching user data:', error);
+            }      
+          }else{
+            setIsLoggedIn(false);
+             Alert.alert(
+              "로그인 필요",
+              "QR 코드를 확인하려면 로그인해야합니다.",
+              [
+                { text: "뒤로가기", onPress: () => navigation.goBack() },
+                { text: "로그인", onPress: () => navigation.navigate("LoginScreen") }
+              ]
+            );
+          }
+        };
+
+      checkLoginStatus();
+    }, [navigation])
+  );
+  
+  useEffect(() => {
+  if (userInfo && userInfo.length > 0) {
+    console.log(userInfo); // 업데이트된 userInfo 값을 출력합니다.
+  }
+  }, [userInfo]);
+
+
+  // qr생성
+  generateQRCode = (canvas) => {
+    if (canvas !== null){
+      // QRCode options
+      var options = {
+        text: "서우 바보",
+    	};
+    	// Create QRCode Object
+    	var qrCode = new QRCode(canvas, options);
+    }
+  }
+
+  //유저 정보 받아오기
   return (
     <View style={styles.container}>
       <Text style={styles.header}>QR</Text>
+      {/* QR 코드 이미지를 표시할 컴포넌트 */}
       <View style={styles.qrContainer}>
-        {/* QR 코드 이미지를 표시할 컴포넌트 */}
-        <Image
-          source={require('../images/QRcode.png')} // 실제 QR 이미지 경로로 변경
-          style={styles.qrCode}
-        />
+        <Canvas ref={this.generateQRCode}/>
       </View>
       {/* 회원정보 불러오기, DB에 QR,예약 여부확인 */}
       <View style={styles.infoCard}>
-        <Text style={styles.userInfo}>김명준</Text>
-        <Text style={styles.userInfo}>2022260000</Text>
+        <Text style={styles.userInfo}>{userInfo.userName}</Text>
+        <Text style={styles.userInfo}>{userInfo.userId}</Text>
         <Text style={styles.userInfo}>탑승 가능</Text>
       </View>
       {/* 예약된 셔틀 시간대와 경로를 불러와야함. */}
@@ -47,7 +110,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   header: {
-    marginTop: 50,
+    marginTop: 100,
     fontSize: 24,
     fontWeight: 'bold',
   },
@@ -61,6 +124,7 @@ const styles = StyleSheet.create({
     height: 200,
   },
   infoCard: {
+    marginTop: 20,
     backgroundColor: '#fff',
     padding: 20,
     borderRadius: 10,

@@ -35,7 +35,7 @@ function LoginScreen({navigation}) {
       <Text style={styles.title}>로그인</Text>
       <TextInput
         style={styles.input}
-        placeholder="사용자 이름"
+        placeholder="학번"
         value={userId}
         onChangeText={setUserId}
       />
