@@ -4,6 +4,7 @@ CREATE TABLE Buses (
     VehicleNumber VARCHAR(50)
 );
 CREATE TABLE Seats (
+    Num int not null,
     SeatID varchar(20) PRIMARY KEY,
     BusID INT,
 	IsReserved BOOLEAN DEFAULT FALSE,
@@ -13,7 +14,7 @@ CREATE TABLE Seats (
 CREATE TABLE Routes (
     RouteID INT AUTO_INCREMENT PRIMARY KEY,
     Name VARCHAR(100),
-    Description TEXT
+    timeTable time
 );
 CREATE TABLE Students (
     StudentID INT auto_increment PRIMARY KEY,

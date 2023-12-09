@@ -175,7 +175,9 @@ function Home({navigation}) {
       </TouchableOpacity>
 
       <View style={styles.menuBox}>
-        <TouchableOpacity style={styles.box}>
+        <TouchableOpacity 
+          onPress={() => navigation.navigate("Location")}
+          style={styles.box}>
           <AntDesign name="enviroment" size={24} color="black" />
           <Text style={styles.boxText}>셔틀 위치</Text>
         </TouchableOpacity>

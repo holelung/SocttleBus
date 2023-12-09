@@ -51,11 +51,6 @@ const QRCodeScreen = ({ navigation }) => {
     }, [navigation])
   );
   
-  useEffect(() => {
-  if (userInfo && userInfo.length > 0) {
-    console.log(userInfo); // 업데이트된 userInfo 값을 출력합니다.
-  }
-  }, [userInfo]);
 
 
   // qr생성
@@ -63,14 +58,14 @@ const QRCodeScreen = ({ navigation }) => {
     if (canvas !== null){
       // QRCode options
       var options = {
-        text: "서우 바보",
+        text: userInfo
     	};
     	// Create QRCode Object
     	var qrCode = new QRCode(canvas, options);
     }
   }
 
-  //유저 정보 받아오기
+  
   return (
     <View style={styles.container}>
       <Text style={styles.header}>QR</Text>

@@ -46,9 +46,9 @@ app.post('/api/login', async (req, res) => {
     // 사용자를 찾고, 패스워드를 검증합니다.
     db.query('SELECT * FROM Students WHERE StudentNumber = ?', [userId], async (error, results) => {
         if (results.length > 0) {
-            const comparison = await bcrypt.compare(password, results[0].password);
+            const comparison = await bcrypt.compare(password, results[0].Password);
             if (comparison) {
-                const token = jwt.sign({ username: results[0].id }, SECRET_KEY);
+                const token = jwt.sign({ username: results[0].StudentNumber }, SECRET_KEY);
                 
                 return res.status(200).json({ token, message: '로그인 성공!'});
             } else {
@@ -70,7 +70,7 @@ app.post('/api/logout', (req, res) => {
 });
 
 //유저 정보 받아서 보내기
-app.get('/api/getuser', (req, res) => {
+app.get('/api/getUser', (req, res) => {
     // token 받아와서 유저 테이블
     const user = authenticateRequest(req);
     console.log(user);
@@ -79,11 +79,57 @@ app.get('/api/getuser', (req, res) => {
         if(results.length > 0){
             //유저 정보 전부 리턴
             console.log(results[0]);
-            return res.status(200).json({ userId: results[0].id, userName: results[0].name });
+            return res.status(200).json({ userId: results[0].StudentNumber, userName: results[0].Name });
         }
         if(error){
             
             return res.status(401).send({ message: "유저 정보 없음"})
+        }
+    });
+});
+
+// 시트정보 추출
+app.post('/api/getSeats', (req, res) => {
+    const {route, canReserve}  = req.body; // 루트 이름과 시간을 받아옴
+    console.log(route, canReserve);
+    // 루트 이름과 시간으로 시간표에서 버스 ID를 찾음
+    db.query('SELECT * FROM Routes WHERE Name = ? AND timeTable >= CURTIME() ORDER BY ABS(TIMESTAMPDIFF(MINUTE, STR_TO_DATE(timeTable, "%H:%i:%s"), CURTIME())) LIMIT 1', [route], async (error, results) => {
+
+        if (error) {
+            console.error("Error: ", error);
+            return res.status(500).send({ message: "서버 오류 발생" });
+        }
+
+        if (results.length > 0) {
+            console.log(results[0]);
+            db.query('SELECT * FROM Buses INNER JOIN Seats ON Buses.BusID = Seats.BusID WHERE Buses.BusID = ? ORDER BY Num', [results[0].BusID], async(err, seatsResults) => {
+                if (error) {
+                    console.error("Error: ", error);
+                    return res.status(500).send({ message: "서버 오류 발생" });
+                }
+
+                if(seatsResults.length > 0){
+                    console.log(seatsResults[0]);
+                    return res.status(200).send({ seats: seatsResults });
+                }else {
+                    return res.status(404).send({ message: "정보 없음2"});
+                }
+                
+            });
+           //현재시간이 시간표보다 지나갔을 때
+        } else if(route == "새절&DMC" && canReserve[0] > 0){
+            //새절&DMC노선의 첫번째 시간표 출력
+            db.query('SELECT * FROM Buses INNER JOIN Seats ON Buses.BusID = Seats.BusID WHERE Buses.BusID = 1 ORDER BY Num', async(err, seatsResults) => {
+                return res.status(200).send({ seats: seatsResults});
+            });            
+        } else if(route == "신촌&합정" && canReserve[1] > 0){
+            //신촌&합정 노선의 첫번째 시간표 출력
+            db.query('SELECT * FROM Buses INNER JOIN Seats ON Buses.BusID = Seats.BusID WHERE Buses.BusID = 2 ORDER BY Num', async(err, seatsResults) => {
+                return res.status(200).send({ seats: seatsResults});
+            });
+        }else {
+            console.log(results);
+            return res.status(404).send({ message: "정보 없음" });
         }
     });
 });

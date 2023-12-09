@@ -13,6 +13,7 @@ import MyPage from './src/screens/mypage';
 import QRCodeScreen from './src/screens/qrcode';
 import ReservationScreen from './src/screens/reservation';
 import AppContext from './src/screens/AppContext';
+import Location from './src/screens/location';
 
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import Axios from 'axios';
@@ -24,7 +25,7 @@ function App() {
 
 
   return (
-     <AppContext.Provider value={'http://172.30.1.13:3001/api/'}>
+     <AppContext.Provider value={'http:/172.30.1.13:3001/api/'}>
     {/* All other components are wrapped by the AppContext.Provider */}
     <NavigationContainer>
       <Stack.Navigator 
@@ -37,6 +38,7 @@ function App() {
         <Stack.Screen name="MyPage" component={MyPage} />
         <Stack.Screen name="QRCodeScreen" component={QRCodeScreen} />
         <Stack.Screen name="ReservationScreen" component={ReservationScreen} />
+        <Stack.Screen name="Location" component={Location} />
       </Stack.Navigator>
     </NavigationContainer>
     </AppContext.Provider>

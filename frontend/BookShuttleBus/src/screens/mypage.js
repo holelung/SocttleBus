@@ -11,6 +11,7 @@ const MyPage = ({ navigation }) => {
     const [userInfo, setUserInfo] = useState([]);
     const [isLoggedIn, setIsLoggedIn] = useState(false);
     const ip = useContext(AppContext);
+    const [undergrad, setUndergrad] = useState(null);
 
     useFocusEffect(
     // 로그아웃 등 다시 Home화면을 불러올때 작동
@@ -28,6 +29,7 @@ const MyPage = ({ navigation }) => {
               });
               console.log(response.data);
               setUserInfo(response.data);
+              
             }catch (error){
               console.log('Error fetching user data:', error);
             }      
@@ -48,9 +50,16 @@ const MyPage = ({ navigation }) => {
       }, [navigation])
     );
 
+    useEffect(() => {
+      if (userInfo && userInfo.userId) {
+        const undergradYear = userInfo.userId.slice(0, 2);
+        setUndergrad(undergradYear);
+      }
+    }, [userInfo]); // userInfo가 변경될 때마다 실행됩니다.
+
     const logoutUser = async () => {
         try {
-            await axios.post(`${ip}logout`);
+            
             await AsyncStorage.removeItem('user-token'); // 인증 토큰을 삭제합니다.
             // 로그아웃 처리 후의 로직을 실행합니다. 예를 들면 홈 화면으로 이동 등
             Alert.alert('로그아웃 되었습니다.');
@@ -71,7 +80,7 @@ const MyPage = ({ navigation }) => {
           source={require('../images/profile.png')} // 아바타 이미지 경로로 변경하세요.
         />
         {/* isLoggedIn이 true면 View띄우고 아니면 로그인 탭  */}
-        <Text style={styles.nameText}>{userInfo.userName} ({userInfo.userId.slice(0,2)}학번)</Text>
+        <Text style={styles.nameText}>{userInfo.userName} ({undergrad}학번)</Text>
         <Text style={styles.idText}>{userInfo.userId}</Text>
       </View>
       <View style={styles.menuContainer}>
