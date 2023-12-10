@@ -18,6 +18,7 @@ import LocationSreen from './src/screens/location';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import Axios from 'axios';
 
+var ip = "15.164.171.14:5000";
 
 const Stack = createNativeStackNavigator();
 
@@ -25,7 +26,7 @@ function App() {
 
 
   return (
-     <AppContext.Provider value={'http://172.30.1.13:3001/api/'}>
+     <AppContext.Provider value={'http://15.164.171.14:5000/api/'}>
     {/* All other components are wrapped by the AppContext.Provider */}
     <NavigationContainer>
       <Stack.Navigator 

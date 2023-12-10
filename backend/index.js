@@ -83,7 +83,7 @@ app.get('/api/getUser', (req, res) => {
         if(results.length > 0){
             //유저 정보 전부 리턴
             console.log(results[0]);
-            return res.status(200).json({ userId: results[0].StudentNumber, userName: results[0].Name });
+            return res.status(200).json({ userId: results[0].StudentNumber, userName: results[0].StudentName });
         }
         if(error){
             
@@ -170,11 +170,11 @@ app.get('/api/getReservation', (req, res) => {
             console.error(err);
             return res.status(500).send({ message: "서버 에러"});
         }
-        if(results !== null){
+        if(results.length > 0){
             console.log("정보 전송 선공");
             return res.status(201).send({ results: results[0] });
         }else{
-            db.query("SELECT * FROM Students WHERE StudentID = ?", [token.userID], async(err,subResults) => {
+            db.query("SELECT * FROM Students WHERE StudentID = ?", [token.userID], async(error ,subResults) => {
                 if(subResults !== null){
                     console.log("예약안된 유저");
                     return res.status(201).send({ results: subResults[0], message:"NoReservation" });

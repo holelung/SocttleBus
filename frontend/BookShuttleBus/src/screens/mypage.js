@@ -77,7 +77,7 @@ const MyPage = ({ navigation }) => {
       <View style={styles.profileContainer}>
         <Image
           style={styles.avatar}
-          source={require('../images/profile.png')} // 아바타 이미지 경로로 변경하세요.
+          source={require('../images/logoCollege.jpeg')} // 아바타 이미지 경로로 변경하세요.
         />
         {/* isLoggedIn이 true면 View띄우고 아니면 로그인 탭  */}
         <Text style={styles.nameText}>{userInfo.userName} ({undergrad}학번)</Text>

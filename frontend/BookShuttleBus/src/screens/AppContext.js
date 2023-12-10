@@ -1,7 +1,7 @@
 import React from "react";
 
 
-const AppContext = React.createContext('http://172.30.1.13:3001/api/');
+const AppContext = React.createContext('http://15.164.171.14:5000/api/');
 
 
 export default AppContext;

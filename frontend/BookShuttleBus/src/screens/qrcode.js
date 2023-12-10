@@ -31,8 +31,9 @@ const QRCodeScreen = ({ navigation }) => {
               });
               if(response.data.message === "NoReservation"){
                 setIsReserved(false);
+              }else{
+                setIsReserved(true);
               } 
-              setIsReserved(true);
               setReservationInfo(response.data.results);
             }catch (error){
               console.log('Error fetching user data:', error);
@@ -63,14 +64,22 @@ const QRCodeScreen = ({ navigation }) => {
   // qr생성
   generateQRCode = (canvas) => {
     if (canvas !== null){
-      var qrData = JSON.stringify({
-        'ID': reservationInfo.ReservationID,
-        'Seat': reservationInfo.SeatID,
-        'Student': reservationInfo.StudentID,
-        'Route': reservationInfo.RouteID,
-        'Bus': reservationInfo.BusID,
-        'Time': reservationInfo.timeTable
-      });
+      if(isReserved === true){
+        var qrData = JSON.stringify({
+          'ID': reservationInfo.ReservationID,
+          'Seat': reservationInfo.SeatID,
+          'Student': reservationInfo.StudentID,
+          'Route': reservationInfo.RouteID,
+          'Bus': reservationInfo.BusID,
+          'Time': reservationInfo.timeTable
+        });
+      }else {
+        var qrData = JSON.stringify({
+          'ID': reservationInfo.StudentID,
+          'Name': reservationInfo.StudentName
+        })
+      }
+     
 
       // QRCode options
       var options = {
