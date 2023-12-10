@@ -1,5 +1,5 @@
 import React, { useContext, useState, useEffect } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, ScrollView } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, ScrollView, Alert } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Ionicons } from '@expo/vector-icons';
 import axios from 'axios';
@@ -20,6 +20,8 @@ const ReservationScreen =  ({ navigation }) => {
     const ip = useContext(AppContext);
     const [seats, setSeats] = useState([]);
     const [route, setRoute] = useState();
+    const [routeTime, setRouteTime] = useState("00:00:00");
+    const [type, setType] = useState();
     var canReserve = [];
     //현재시간
     var date = moment().utcOffset('+09:00');
@@ -32,26 +34,78 @@ const ReservationScreen =  ({ navigation }) => {
     canReserve[0] = moment.duration(date.diff(timeDMC)).asHours();
     canReserve[1] = moment.duration(date.diff(timeSC)).asHours();
 
+    
+     // 이 함수는 버튼 클릭 시 호출되어 예약 화면을 업데이트할 수 있습니다.
+    const selectRoute = (routeName) => {
+        console.log(canReserve);
+        // TODO: 선택된 노선에 대한 로직 구현
+        setRoute(routeName);
+        console.log(routeName + ' route selected.');
+        getSeats(routeName, canReserve);
+    };
 
     const getSeats = async(route, canReserve) => {
         try{
             console.log(route);
             const response = await axios.post(`${ip}getSeats`, {route, canReserve});
             setSeats(response.data.seats);
+            setRouteTime(response.data.seats[0].timeTable);
+            setType(response.data.seats[0].Type);
             console.log(response.data.seats[0]);
 
             console.log("시트 불러오기 성공");
         }catch (error) {
-             console.error('정보 불러오기 실패:', error);
+             console.error('시트정보 불러오기 실패:', error);
         }
-    }
-    
-  
+    };
+    //예약 버튼 클릭
+    const reserveBtn = (seatId) => {
+         Alert.alert(
+            seats.SeatID,
+            "예약하시겠습니까?", [
+                {text: "아니오", style: "cancel"},
+                {
+                    text: "예" ,
+                    style: "destructive",
+                    onPress: async() => reserve(seatId),
+                }
+            ]
+        )
+    };
 
-    const seatRows = chunkArray(seats, 4);
+
+    //예약
+    const reserve = async(seatId) => {
+        const token = await AsyncStorage.getItem('user-token');
+        var reservationInfo = [];
+        var len = seats.length;
+
+        for(var i = 0; i< len; i++){
+            if (seats[i].SeatID === seatId) {
+                reservationInfo = seats[i];
+                console.log(reservationInfo);
+                break;
+            }
+        }
+
+        try{
+            const response = await axios.post(`${ip}makeReservation`, reservationInfo, {
+                headers: {
+                  Authorization: `Bearer ${token}` // 헤더에 토큰을 포함합니다.
+                },
+            });
+            console.log('예약 완료:', response.data.message);
+            // 에약 등록후 예약좌석변경 
+            Alert.alert('예약 완료 되었습니다.');
+            getSeats(reservationInfo.Name, canReserve);
+        }catch (error) {
+            console.error('실패:', error);
+        }
+    };
+
 
      // 좌석을 렌더링하는 함수 (좌석 데이터를 파라미터로 받습니다)
-     const renderSeat = (seat, index, isLast) => {
+    const renderSeat = (seat, index, isLast) => {
         const isReserved = seat.IsReserved === 1;
         const seatStyle = isReserved ? styles.reservedSeat : styles.availableSeat;
          // 4n - 2번째 좌석이면서 마지막 좌석이 아닌 경우에만 공간을 추가
@@ -59,7 +113,7 @@ const ReservationScreen =  ({ navigation }) => {
 
         return (
            <View key={seat.SeatID} style={styles.seatWrapper}>
-                <TouchableOpacity style={seatStyle} disabled={isReserved} >
+                <TouchableOpacity style={seatStyle} disabled={isReserved} onPress={() => reserveBtn(seat.SeatID)}>
                     <Text>{seat.SeatID}</Text>
                 </TouchableOpacity>
                 {/* 4n - 2번째 좌석 뒤에 공간 추가 */}
@@ -76,14 +130,7 @@ const ReservationScreen =  ({ navigation }) => {
         ));
     };
 
-    // 이 함수는 버튼 클릭 시 호출되어 예약 화면을 업데이트할 수 있습니다.
-    const selectRoute = (routeName) => {
-        console.log(canReserve);
-        // TODO: 선택된 노선에 대한 로직 구현
-        setRoute(routeName);
-        console.log(routeName + ' route selected.');
-        getSeats(routeName, canReserve);
-    };
+   
 
     
     useEffect(() => {
@@ -106,8 +153,8 @@ const ReservationScreen =  ({ navigation }) => {
                 </TouchableOpacity>
             </View>
             <View style={styles.info}>
-                <Text style={styles.infoText}>출발 시간: 8:20</Text>
-                <Text style={styles.infoText}>29인승</Text>
+                <Text style={styles.infoText}>출발 시간: {routeTime.slice(0,5)}</Text>
+                <Text style={styles.infoText}>{type}인승</Text>
             </View>
             <ScrollView style={styles.seatsContainer}>
                 {renderRows(seats)}

@@ -28,7 +28,7 @@ CREATE TABLE Reservations (
     RouteID INT,
     BusID INT,
     SeatID varchar(20),
-    DateTime DATETIME,
+    DateTime DATETIME default current_timestamp,
     FOREIGN KEY (StudentID) REFERENCES Students(StudentID),
     FOREIGN KEY (RouteID) REFERENCES Routes(RouteID),
     FOREIGN KEY (BusID) REFERENCES Buses(BusID),

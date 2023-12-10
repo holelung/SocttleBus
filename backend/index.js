@@ -3,6 +3,8 @@ const mysql = require("mysql");
 const cors = require("cors");
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
+const schedule = require('node-schedule');
+const moment = require('moment-timezone');
 
 const SECRET_KEY = 'your_secret_key'; // JWT 시크릿 키
 
@@ -48,8 +50,10 @@ app.post('/api/login', async (req, res) => {
         if (results.length > 0) {
             const comparison = await bcrypt.compare(password, results[0].Password);
             if (comparison) {
-                const token = jwt.sign({ username: results[0].StudentNumber }, SECRET_KEY);
-                
+                const token = jwt.sign({ 
+                    username: results[0].StudentNumber,
+                    userID: results[0].StudentID
+                }, SECRET_KEY);
                 return res.status(200).json({ token, message: '로그인 성공!'});
             } else {
                 return res.status(401).send({ message: '로그인 실패: 패스워드가 잘못되었습니다.' });
@@ -102,7 +106,7 @@ app.post('/api/getSeats', (req, res) => {
 
         if (results.length > 0) {
             console.log(results[0]);
-            db.query('SELECT * FROM Buses INNER JOIN Seats ON Buses.BusID = Seats.BusID WHERE Buses.BusID = ? ORDER BY Num', [results[0].BusID], async(err, seatsResults) => {
+            db.query('SELECT * FROM Buses INNER JOIN Seats ON Buses.BusID = Seats.BusID INNER JOIN Routes ON Seats.BusID = Routes.BusID WHERE Buses.BusID = ? AND Routes.TimeTable = ? ORDER BY Num', [results[0].BusID, results[0].timeTable], async(err, seatsResults) => {
                 if (error) {
                     console.error("Error: ", error);
                     return res.status(500).send({ message: "서버 오류 발생" });
@@ -119,12 +123,12 @@ app.post('/api/getSeats', (req, res) => {
            //현재시간이 시간표보다 지나갔을 때
         } else if(route == "새절&DMC" && canReserve[0] > 0){
             //새절&DMC노선의 첫번째 시간표 출력
-            db.query('SELECT * FROM Buses INNER JOIN Seats ON Buses.BusID = Seats.BusID WHERE Buses.BusID = 1 ORDER BY Num', async(err, seatsResults) => {
+            db.query('SELECT * FROM Buses INNER JOIN Seats ON Buses.BusID = Seats.BusID INNER JOIN Routes ON Seats.BusID = Routes.BusID WHERE Buses.BusID = 1 AND Routes.timeTable = "08:05:00" ORDER BY Num', async(err, seatsResults) => {
                 return res.status(200).send({ seats: seatsResults});
             });            
         } else if(route == "신촌&합정" && canReserve[1] > 0){
             //신촌&합정 노선의 첫번째 시간표 출력
-            db.query('SELECT * FROM Buses INNER JOIN Seats ON Buses.BusID = Seats.BusID WHERE Buses.BusID = 2 ORDER BY Num', async(err, seatsResults) => {
+            db.query('SELECT * FROM Buses INNER JOIN Seats ON Buses.BusID = Seats.BusID INNER JOIN Routes ON Seats.BusID = Routes.BusID WHERE Buses.BusID = 2 AND Routes.timeTable = "08:05:00" ORDER BY Num', async(err, seatsResults) => {
                 return res.status(200).send({ seats: seatsResults});
             });
         }else {
@@ -132,6 +136,30 @@ app.post('/api/getSeats', (req, res) => {
             return res.status(404).send({ message: "정보 없음" });
         }
     });
+});
+
+app.post('/api/makeReservation', (req, res) =>{
+    const reservationInfo = req.body;
+    const token = authenticateRequest(req);
+    console.log({reservationInfo: reservationInfo}, {token: token});
+    if(reservationInfo.length !== null && token !== null){
+        db.query("UPDATE Seats SET IsReserved = true WHERE SeatID = ?", [reservationInfo.SeatID], async(error, results) => {
+            if(error){
+                console.error(error);
+            }
+            console.log("Seat 테이블 정보변경 성공");
+        });
+        db.query("INSERT INTO Reservations (StudentID, RouteID, BusID, SeatID) VALUES (?, ?, ?, ?)", [token.userID, reservationInfo.RouteID, reservationInfo.BusID, reservationInfo.SeatID], async(err, results) => {
+            if (err) {
+                console.error(err);
+                return res.status(500).send({ message: '예약 등록중 오류가 발생했습니다.', err });
+            }
+            console.log("Reservations 정보입력 성공");
+            return res.status(201).send({ message: '예약이 성공적으로 완료되었습니다.' });
+        });
+    }else {
+        return res.status(404).send({ message: "값이 없습니다."});
+    }
 });
 
 // 인증 함수(JWT 사용)
@@ -151,6 +179,38 @@ function authenticateRequest(req) {
 }
 
 
+
+
+// 버스 시간표 시작 15분전에 Seats의 IsReserved 컬럼 초기화
+
+// 데이터베이스 컬럼 초기화 함수
+const resetIsReserved = () => {
+    console.log("Job 실행");
+    const query = "UPDATE Seats SET IsReserved = 0";
+    db.query(query, (err, results) => {
+        if (err) {
+            console.error('Error resetting column:', err);
+            return;
+        }
+        console.log('Column reset successfully at', new Date());
+    });
+};
+
+
+const job = schedule.scheduleJob({hour: [7, 8, 12, 13, 15, 16, 17, 18], minute: 35, dayOfWeek: [0, 1, 2, 3, 4, 5]}, () => {
+  resetIsReserved();
+});
+
+// schedule test함수
+// const date = new Date();
+// date.setMinutes(date.getMinutes() + 1);
+
+// const job = schedule.scheduleJob(date, () => {
+//     resetIsReserved(1);
+// });
+
+// // 스케줄러가 제대로 설정되었는지 확인
+// console.log(`Job scheduled for: ${date}`);
 
 app.listen(3001, () => {
   console.log("Server is running onn port 3001");
