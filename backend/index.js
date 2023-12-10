@@ -162,6 +162,31 @@ app.post('/api/makeReservation', (req, res) =>{
     }
 });
 
+app.get('/api/getReservation', (req, res) => {
+    const token = authenticateRequest(req);
+   
+    db.query("SELECT * FROM Reservations INNER JOIN Students ON Students.StudentID = Reservations.StudentID INNER JOIN Routes ON Routes.RouteID = Reservations.RouteID INNER JOIN Buses ON Buses.BusID = Reservations.BusID INNER JOIN Seats ON Seats.SeatID = Reservations.SeatID WHERE Reservations.StudentID = ? ORDER BY ReservationID DESC LIMIT 1", [token.userID], async(err, results) => {
+        if(err){
+            console.error(err);
+            return res.status(500).send({ message: "서버 에러"});
+        }
+        if(results !== null){
+            console.log("정보 전송 선공");
+            return res.status(201).send({ results: results[0] });
+        }else{
+            db.query("SELECT * FROM Students WHERE StudentID = ?", [token.userID], async(err,subResults) => {
+                if(subResults !== null){
+                    console.log("예약안된 유저");
+                    return res.status(201).send({ results: subResults[0], message:"NoReservation" });
+                }else{
+                    console.log("값 없음");
+                    return res.status(404).send({ message: "정보를 찾지 못하였습니다."})
+                }
+            });
+        }
+    })
+})
+
 // 인증 함수(JWT 사용)
 function authenticateRequest(req) {
   // 요청 헤더에서 토큰을 추출합니다.

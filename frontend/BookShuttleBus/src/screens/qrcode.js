@@ -10,8 +10,9 @@ import AppContext from './AppContext';
 
 // 로그인 안되있으면 진입불가 => 로그인 화면으로 이동
 const QRCodeScreen = ({ navigation }) => {
-  const [userInfo, setUserInfo] = useState([]);
+  const [reservationInfo, setReservationInfo] = useState([]);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [isReserved, setIsReserved] = useState(false);
   const ip = useContext(AppContext);
 
   useFocusEffect(
@@ -20,17 +21,19 @@ const QRCodeScreen = ({ navigation }) => {
       const checkLoginStatus = async () => {
         const token = await AsyncStorage.getItem('user-token');
           if (token){
-            console.log(token);
             setIsLoggedIn(true);
             // 유저 정보 전체 불러오기
             try {
-              const response = await axios.get(`${ip}getuser`, {
+              const response = await axios.get(`${ip}getReservation`, {
                 headers: {
                   Authorization: `Bearer ${token}` // 헤더에 토큰을 포함합니다.
                 }
               });
-              console.log(response.data);
-              setUserInfo(response.data);
+              if(response.data.message === "NoReservation"){
+                setIsReserved(false);
+              } 
+              setIsReserved(true);
+              setReservationInfo(response.data.results);
             }catch (error){
               console.log('Error fetching user data:', error);
             }      
@@ -51,14 +54,27 @@ const QRCodeScreen = ({ navigation }) => {
     }, [navigation])
   );
   
+  useEffect(() => {
+    console.log(reservationInfo);
+    console.log(reservationInfo.StudentName);
+  }, [reservationInfo]);
 
 
   // qr생성
   generateQRCode = (canvas) => {
     if (canvas !== null){
+      var qrData = JSON.stringify({
+        'ID': reservationInfo.ReservationID,
+        'Seat': reservationInfo.SeatID,
+        'Student': reservationInfo.StudentID,
+        'Route': reservationInfo.RouteID,
+        'Bus': reservationInfo.BusID,
+        'Time': reservationInfo.timeTable
+      });
+
       // QRCode options
       var options = {
-        text: userInfo
+        text: qrData
     	};
     	// Create QRCode Object
     	var qrCode = new QRCode(canvas, options);
@@ -75,9 +91,9 @@ const QRCodeScreen = ({ navigation }) => {
       </View>
       {/* 회원정보 불러오기, DB에 QR,예약 여부확인 */}
       <View style={styles.infoCard}>
-        <Text style={styles.userInfo}>{userInfo.userName}</Text>
-        <Text style={styles.userInfo}>{userInfo.userId}</Text>
-        <Text style={styles.userInfo}>탑승 가능</Text>
+        <Text style={styles.userInfo}>{reservationInfo.StudentName}</Text>
+        <Text style={styles.userInfo}>{reservationInfo.StudentNumber}</Text>
+        <Text style={styles.userInfo}>예약 여부: {isReserved ? 'Yes' : 'No'}</Text>
       </View>
       {/* 예약된 셔틀 시간대와 경로를 불러와야함. */}
       <View style={styles.bottomNav}>
