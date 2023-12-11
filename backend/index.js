@@ -33,7 +33,7 @@ app.post('/api/join', async (req, res) => {
 
     const hashedPassword = await bcrypt.hash(password, 10);
 
-    db.query('INSERT INTO Students (StudentNumber, Password, Name) VALUES (?, ?, ?)', [userId, hashedPassword, name], (error, results) => {
+    db.query('INSERT INTO Students (StudentNumber, Password, StudentName) VALUES (?, ?, ?)', [userId, hashedPassword, name], (error, results) => {
         if (error) {
             console.error(error);
             return res.status(500).send({ message: '사용자 등록 중 오류가 발생했습니다.', error });

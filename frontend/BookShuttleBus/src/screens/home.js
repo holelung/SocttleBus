@@ -95,7 +95,7 @@ function Home({navigation}) {
   const saveHead = async(key) =>{
     try {
       const headValue = JSON.stringify(key);
-      await AsyncStorage.setItem('head-key', headValue);
+      await AsyncStorage.setItem('head-key', headValue.toString());
     } catch(error){
       console.log(error);
     }
@@ -103,7 +103,7 @@ function Home({navigation}) {
   const saveData = async(key) =>{
     try {
       const dataValue = JSON.stringify(key);
-      await AsyncStorage.setItem('data-key', dataValue);
+      await AsyncStorage.setItem('data-key', dataValue.toString());
     } catch(error){
       console.log(error);
     }
@@ -260,7 +260,6 @@ const styles = StyleSheet.create({
   },
   loginMenuText: {
     fontSize: 22,
-    fontWeight: 900,
     textAlign: "center",
   },
   timeTable: {

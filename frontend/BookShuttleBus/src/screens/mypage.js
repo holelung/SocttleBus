@@ -133,7 +133,6 @@ const styles = StyleSheet.create({
   },
   headerText: {
     fontSize: 20,
-    fontWeight: 'bold',
   },
   profileContainer: {
     flex: 1,
@@ -149,7 +148,6 @@ const styles = StyleSheet.create({
   },
   nameText: {
     fontSize: 18,
-    fontWeight: 'bold',
   },
   idText: {
     fontSize: 16,
