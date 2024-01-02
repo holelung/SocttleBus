@@ -51,7 +51,7 @@ app.post('/api/login', async (req, res) => {
             const comparison = await bcrypt.compare(password, results[0].Password);
             if (comparison) {
                 const token = jwt.sign({ 
-                    username: results[0].StudentNumber,
+                    userNum: results[0].StudentNumber,
                     userID: results[0].StudentID
                 }, SECRET_KEY);
                 return res.status(200).json({ token, message: '로그인 성공!'});
@@ -137,7 +137,7 @@ app.post('/api/getSeats', (req, res) => {
         }
     });
 });
-
+// 예약생성
 app.post('/api/makeReservation', (req, res) =>{
     const reservationInfo = req.body;
     const token = authenticateRequest(req);
@@ -162,9 +162,11 @@ app.post('/api/makeReservation', (req, res) =>{
     }
 });
 
+// 예약정보 가져오기
 app.get('/api/getReservation', (req, res) => {
     const token = authenticateRequest(req);
-   
+    
+    // 오늘 날짜 셔틀시간표 기준으로 탐색해야됨
     db.query("SELECT * FROM Reservations INNER JOIN Students ON Students.StudentID = Reservations.StudentID INNER JOIN Routes ON Routes.RouteID = Reservations.RouteID INNER JOIN Buses ON Buses.BusID = Reservations.BusID INNER JOIN Seats ON Seats.SeatID = Reservations.SeatID WHERE Reservations.StudentID = ? ORDER BY ReservationID DESC LIMIT 1", [token.userID], async(err, results) => {
         if(err){
             console.error(err);
@@ -237,8 +239,8 @@ const job = schedule.scheduleJob({hour: [7, 8, 12, 13, 15, 16, 17, 18], minute: 
 // // 스케줄러가 제대로 설정되었는지 확인
 // console.log(`Job scheduled for: ${date}`);
 
-app.listen(3001, () => {
-  console.log("Server is running onn port 3001");
+app.listen(3002, () => {
+  console.log("Server is running onn port 3002");
 });
 
 

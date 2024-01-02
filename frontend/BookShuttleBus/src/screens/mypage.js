@@ -22,7 +22,7 @@ const MyPage = ({ navigation }) => {
             setIsLoggedIn(true);
             // 유저 정보 전체 불러오기
             try {
-              const response = await axios.get(`${ip}getuser`, {
+              const response = await axios.get(`${ip}getUser`, {
                 headers: {
                   Authorization: `Bearer ${token}` // 헤더에 토큰을 포함합니다.
                 }

@@ -1,7 +1,7 @@
 import React, {useState, useEffect} from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, ScrollView, Wrapper } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-// import MapView from 'react-native-maps';
+import MapView from 'react-native-maps';
 import { PROVIDER_GOOGLE, Marker } from 'react-native-maps';
 import * as Location from 'expo-location';
 

@@ -60,6 +60,7 @@ const ReservationScreen =  ({ navigation }) => {
     };
     //예약 버튼 클릭
     const reserveBtn = (seatId) => {
+        
          Alert.alert(
             seats.SeatID,
             "예약하시겠습니까?", [
