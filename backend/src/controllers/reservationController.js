@@ -1,7 +1,7 @@
 
 const getConnection = require('../config/dbConfig');
 const authReq = require('../utils/authReq');
-const schedule = require('node-schedule');
+
 
 
 // 예약 생성
@@ -36,7 +36,7 @@ exports.makeReservation = async(req, res, next) => {
 
 
 // 예약 정보 불러오기
-exports.getReservation = (req, res, next) => {
+exports.getReservation = async(req, res, next) => {
     const token = authReq.authenticateRequest(req);
 
     if (!token) {
@@ -46,7 +46,7 @@ exports.getReservation = (req, res, next) => {
     try {
         const connection = getConnection();
 
-        connection.query("SELECT * FROM Reservations INNER JOIN Students ON Students.StudentID = Reservations.StudentID INNER JOIN Routes ON Routes.RouteID = Reservations.RouteID INNER JOIN Buses ON Buses.BusID = Reservations.BusID INNER JOIN Seats ON Seats.SeatID = Reservations.SeatID WHERE Reservations.StudentID = ? ORDER BY ReservationID DESC LIMIT 1", [token.userID], (err, results) => {
+        connection.query("SELECT * FROM Reservations INNER JOIN Students ON Students.StudentID = Reservations.StudentID INNER JOIN Routes ON Routes.RouteID = Reservations.RouteID INNER JOIN Buses ON Buses.BusID = Reservations.BusID INNER JOIN Seats ON Seats.SeatID = Reservations.SeatID WHERE Reservations.StudentID = ? ORDER BY ReservationID DESC LIMIT 1", [token.userID], async(err, results) => {
             if (err) {
                 throw err;
             }
@@ -79,23 +79,3 @@ exports.getReservation = (req, res, next) => {
     }
 };
 
-// 데이터베이스 컬럼 초기화 함수
-const resetIsReserved = () => {
-    console.log("Job 실행");
-
-    const connection = getConnection();
-    const query = "UPDATE Seats SET IsReserved = 0";
-
-    connection.query(query, (err, results) => {
-        if (err) {
-            console.error('Error resetting column:', err);
-            return;
-        }
-        console.log('Column reset successfully at', new Date());
-    });
-};
-
-
-const job = schedule.scheduleJob({hour: [7, 8, 12, 13, 15, 16, 17, 18], minute: 35, dayOfWeek: [0, 1, 2, 3, 4, 5]}, () => {
-  resetIsReserved();
-});
