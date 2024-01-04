@@ -89,7 +89,6 @@ exports.changeIsReserved = (req, res, next) => {
 };
 
 
-// 데이터베이스 컬럼 초기화 함수
 const resetIsReserved = () => {
     console.log("Job 실행");
 
@@ -109,3 +108,4 @@ const resetIsReserved = () => {
 const job = schedule.scheduleJob({hour: [7, 8, 12, 13, 15, 16, 17, 18], minute: 35, dayOfWeek: [0, 1, 2, 3, 4, 5]}, () => {
   resetIsReserved();
 });
+

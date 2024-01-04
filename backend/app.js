@@ -4,6 +4,9 @@ const userRoutes = require('./src/routes/userRoutes');
 const reservationRoutes = require('./src/routes/reservationRoutes');
 const seatRoutes = require('./src/routes/seatRoutes');
 
+
+
+
 const cors = require('cors');
 
 
@@ -19,11 +22,11 @@ app.use('/api', userRoutes);
 app.use('/api', reservationRoutes);
 app.use('/api', seatRoutes);
 
-
 // 테스트 출력
 app.get("/", function(req, res){
     res.send("Hello world!");
 });
+
 
 
 // 서버 시작
