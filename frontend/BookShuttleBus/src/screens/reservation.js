@@ -18,6 +18,8 @@ import moment from 'moment';
 
 const ReservationScreen =  ({ navigation }) => {
     const ip = useContext(AppContext);
+
+    // seats는 Buses, Routes, Seats 테이블의 정보를 모두 포함한다.
     const [seats, setSeats] = useState([]);
     const [route, setRoute] = useState();
     const [routeTime, setRouteTime] = useState("00:00:00");
@@ -81,6 +83,7 @@ const ReservationScreen =  ({ navigation }) => {
         var reservationInfo = [];
         var len = seats.length;
 
+        // SeatID에 해당하는 seats 데이터 저장
         for(var i = 0; i< len; i++){
             if (seats[i].SeatID === seatId) {
                 reservationInfo = seats[i];
@@ -97,6 +100,9 @@ const ReservationScreen =  ({ navigation }) => {
             });
             console.log('예약 완료:', response.data.message);
             // 에약 등록후 예약좌석변경 
+            const IsReserveChange = await axios.post(`${ip}changeIsReserved`, reservationInfo);
+            console.log("좌석 정보변경 완료:", IsReserveChange.data.message);
+
             Alert.alert('예약 완료 되었습니다.');
             getSeats(reservationInfo.Name, canReserve);
         }catch (error) {
@@ -106,22 +112,23 @@ const ReservationScreen =  ({ navigation }) => {
 
 
      // 좌석을 렌더링하는 함수 (좌석 데이터를 파라미터로 받습니다)
-    const renderSeat = (seat, index, isLast) => {
-        const isReserved = seat.IsReserved === 1;
+    const renderSeat = (seats, index, isLast) => {
+        const isReserved = seats.IsReserved === 1;
         const seatStyle = isReserved ? styles.reservedSeat : styles.availableSeat;
          // 4n - 2번째 좌석이면서 마지막 좌석이 아닌 경우에만 공간을 추가
         const isSpaceAfter = (index + 1) % 4 === 2 && !isLast;
 
         return (
-           <View key={seat.SeatID} style={styles.seatWrapper}>
-                <TouchableOpacity style={seatStyle} disabled={isReserved} onPress={() => reserveBtn(seat.SeatID)}>
-                    <Text>{seat.SeatID}</Text>
+           <View key={seats.SeatID} style={styles.seatWrapper}>
+                <TouchableOpacity style={seatStyle} disabled={isReserved} onPress={() => reserveBtn(seats.SeatID)}>
+                    <Text>{seats.SeatID}</Text>
                 </TouchableOpacity>
                 {/* 4n - 2번째 좌석 뒤에 공간 추가 */}
                 {isSpaceAfter && <View style={styles.space} />}
             </View>
         );
     };
+    // View에서 호출
     const renderRows = (seats) => {
         const seatRows = chunkArray(seats, 4); // 4개씩 나누어 줄 단위로 배열 생성
         return seatRows.map((row, rowIndex) => (

@@ -1,6 +1,7 @@
 const getConnection = require('../config/dbConfig');
 const schedule = require('node-schedule');
 
+// 시트 정보 불러오기 함수
 exports.getSeats = (req, res, next) => {
     const { route, canReserve } = req.body;
 
@@ -55,6 +56,36 @@ exports.getSeats = (req, res, next) => {
         console.error("서버 오류:", err);
         return res.status(500).send({ message: "서버 오류 발생" });
     }
+};
+
+// isReserved 변환 함수
+exports.changeIsReserved = (req, res, next) => {
+    const seat = req.body;
+
+    if (!seat) {
+        return res.status(400).send({ message: '정보가 누락되었습니다.'});
+    }
+
+    try{
+        const connection = getConnection();
+
+        connection.query("UPDATE Seats SET IsReserved = true WHERE SeatID = ?", [seat.SeatID], (error, results) => {
+            
+            connection.end();
+
+            if(error) {
+                console.error(error);
+                
+                return res.status(500).send({ message: '시트정보 변경 중 오류발생'});
+            }
+            console.log("시트정보 변경 완료");
+            return res.status(201).send({message : '시트 정보 변경완료'});
+            
+        });
+    }catch(error){
+        console.error(error);
+    }
+    
 };
 
 

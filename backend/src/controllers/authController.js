@@ -60,7 +60,9 @@ exports.login = async (req, res, next) => {
                     const comparison = await bcrypt.compare(password, results[0].Password);
                     if (comparison) {
                         const token = jwt.sign({
+                            // 유저 정보 확인시 필요
                             userNum: results[0].StudentNumber,
+                            // 예약 테이블 확인시 필요
                             userID: results[0].StudentID
                         }, SECRET_KEY);
                         return res.status(200).json({ token, message: '로그인 성공!' });

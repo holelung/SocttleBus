@@ -21,16 +21,8 @@ exports.makeReservation = async(req, res, next) => {
             connection.end();
             return res.status(500).send({ message: '예약 중 오류가 발생했습니다.' });
         }
-
-        connection.query("UPDATE Seats SET IsReserved = true WHERE SeatID = ?", [reservationInfo.SeatID], (err, updateResults) => {
-            connection.end();
-            if(err) {
-                console.error(err);
-                return res.status(500).send({ message: '좌석 상태 업데이트 중 오류가 발생했습니다.' });
-            }
-            console.log("시트 정보 변경 완료");
-            return res.status(201).send({message: '예약이 완료되었습니다.'});
-        });
+        console.log("예약 정보 생성 완료");
+        return res.status(201).send({message: '예약이 완료되었습니다.'});
     });
 };
 
