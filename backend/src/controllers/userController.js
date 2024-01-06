@@ -6,8 +6,6 @@ const getConnection = require('../config/dbConfig');
 const authReq = require('../utils/authReq');
 
 exports.getUser = async (req, res, next) => {
-    // jwt token으로 유저 정보 확인
-    const test = req.headers;
     // jwt token 복호화
     const user = authReq.authenticateRequest(req);
     console.log(user);
@@ -18,8 +16,8 @@ exports.getUser = async (req, res, next) => {
                 console.log(results[0]);
                 
                 return res.status(200).json({ 
-                    userId: results[0].StudentNumber,
-                    userName: results[0].StudentName 
+                    StudentNumber: results[0].StudentNumber,
+                    StudentName: results[0].StudentName 
                 });
             }
             if(error){

@@ -51,8 +51,8 @@ const MyPage = ({ navigation }) => {
     );
 
     useEffect(() => {
-      if (userInfo && userInfo.userId) {
-        const undergradYear = userInfo.userId.slice(0, 2);
+      if (userInfo && userInfo.StudentNumber) {
+        const undergradYear = userInfo.StudentNumber.slice(0, 2);
         setUndergrad(undergradYear);
       }
     }, [userInfo]); // userInfo가 변경될 때마다 실행됩니다.
@@ -80,8 +80,8 @@ const MyPage = ({ navigation }) => {
           source={require('../images/logoCollege.jpeg')} // 아바타 이미지 경로로 변경하세요.
         />
         {/* isLoggedIn이 true면 View띄우고 아니면 로그인 탭  */}
-        <Text style={styles.nameText}>{userInfo.userName} ({undergrad}학번)</Text>
-        <Text style={styles.idText}>{userInfo.userId}</Text>
+        <Text style={styles.nameText}>{userInfo.StudentName} ({undergrad}학번)</Text>
+        <Text style={styles.idText}>{userInfo.StudentNumber}</Text>
       </View>
       <View style={styles.menuContainer}>
         {/* 로그아웃 되어있을 경우 없음 */}

@@ -11,6 +11,7 @@ import AppContext from './AppContext';
 // 로그인 안되있으면 진입불가 => 로그인 화면으로 이동
 const QRCodeScreen = ({ navigation }) => {
   const [reservationInfo, setReservationInfo] = useState([]);
+  const [userInfo, setUserInfo] = useState([]);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [isReserved, setIsReserved] = useState(false);
   const ip = useContext(AppContext);
@@ -21,20 +22,25 @@ const QRCodeScreen = ({ navigation }) => {
       const checkLoginStatus = async () => {
         const token = await AsyncStorage.getItem('user-token');
           if (token){
+            // 로그인 확인
             setIsLoggedIn(true);
-            // 유저 정보 전체 불러오기
+            const userInfo = await getUserInfo(token);
+            setUserInfo(userInfo);
+
             try {
               const response = await axios.get(`${ip}getReservation`, {
                 headers: {
                   Authorization: `Bearer ${token}` // 헤더에 토큰을 포함합니다.
                 }
               });
-              if(response.data.message === "NoReservation"){
-                setIsReserved(false);
-              }else{
+              
+              if(response.data.results !== "NoReservation"){
                 setIsReserved(true);
-              } 
-              setReservationInfo(response.data.results);
+                setReservationInfo(response.data.results);
+              } else {
+                setIsReserved(false);
+              }
+              
             }catch (error){
               console.log('Error fetching user data:', error);
             }      
@@ -54,17 +60,31 @@ const QRCodeScreen = ({ navigation }) => {
       checkLoginStatus();
     }, [navigation])
   );
-  
+
   useEffect(() => {
-    console.log(reservationInfo);
-    console.log(reservationInfo.StudentName);
-  }, [reservationInfo]);
+    console.log(userInfo);
+  }, [userInfo])
+
+
+  const getUserInfo = async(token) => {
+    try{
+      const response = await axios.get(`${ip}getUser`, {
+        headers: {
+          Authorization: `Bearer ${token}`
+        }
+      });
+      console.log(response.data);
+      return (response.data);
+    }catch(error){
+      console.log('Error fetching user data:', error);
+    }
+  };
 
 
   // qr생성
   generateQRCode = (canvas) => {
     if (canvas !== null){
-      if(isReserved === true){
+      if(isReserved && reservationInfo){
         var qrData = JSON.stringify({
           'ID': reservationInfo.ReservationID,
           'Seat': reservationInfo.SeatID,
@@ -75,8 +95,8 @@ const QRCodeScreen = ({ navigation }) => {
         });
       }else {
         var qrData = JSON.stringify({
-          'ID': reservationInfo.StudentID,
-          'Name': reservationInfo.StudentName
+          'ID': userInfo.StudentID,
+          'Name': userInfo.StudentName
         })
       }
      
@@ -100,9 +120,15 @@ const QRCodeScreen = ({ navigation }) => {
       </View>
       {/* 회원정보 불러오기, DB에 QR,예약 여부확인 */}
       <View style={styles.infoCard}>
-        <Text style={styles.userInfo}>{reservationInfo.StudentName}</Text>
-        <Text style={styles.userInfo}>{reservationInfo.StudentNumber}</Text>
+        <Text style={styles.userInfo}>{userInfo.StudentName}</Text>
+        <Text style={styles.userInfo}>{userInfo.StudentNumber}</Text>
         <Text style={styles.userInfo}>예약 여부: {isReserved ? 'Yes' : 'No'}</Text>
+        {isReserved && reservationInfo && (
+          <>
+            <Text style={styles.userInfo}>예약 시간: {reservationInfo.timeTable}</Text>
+            <Text style={styles.userInfo}>예약 좌석: {reservationInfo.SeatID}</Text>
+          </>
+        )}
       </View>
       {/* 예약된 셔틀 시간대와 경로를 불러와야함. */}
       <View style={styles.bottomNav}>

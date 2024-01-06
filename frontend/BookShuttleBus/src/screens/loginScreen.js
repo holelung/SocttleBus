@@ -13,7 +13,7 @@ function LoginScreen({navigation}) {
   const ip = useContext(AppContext);
 
   const loginUser = async (userId, password) => {
-    try {
+    try { //userId = StudentNumber
       const response = await axios.post(`${ip}login`, { userId, password });
       // 로그인 성공 후, 서버로부터 받은 쿠키를 저장합니다.
       const token = response.data.token; // 서버로부터 받은 인증 토큰
