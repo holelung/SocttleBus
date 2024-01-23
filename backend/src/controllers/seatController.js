@@ -58,6 +58,8 @@ exports.getSeats = (req, res, next) => {
     }
 };
 
+
+// isReserved 삭제 예정 
 // isReserved 변환 함수
 exports.changeIsReserved = (req, res, next) => {
     const seat = req.body;

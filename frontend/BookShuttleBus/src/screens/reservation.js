@@ -48,8 +48,9 @@ const ReservationScreen =  ({ navigation }) => {
 
     const getSeats = async(route, canReserve) => {
         try{
-            console.log(route);
+            //route = 새절&DMC || 신촌&합정
             const response = await axios.post(`${ip}getSeats`, {route, canReserve});
+            // seats = Buses, Seats, Routes 테이블 전체 
             setSeats(response.data.seats);
             setRouteTime(response.data.seats[0].timeTable);
             setType(response.data.seats[0].Type);

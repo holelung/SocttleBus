@@ -10,10 +10,12 @@ exports.makeReservation = async(req, res, next) => {
     if (!reservationInfo || !token) {
         return res.status(400).send({ message: '예약 정보 또는 사용자 토큰이 누락되었습니다.' });
     }
-
+    var day = selectDay();
+    day = day + " " + reservationInfo.timeTable; 
+    console.log(day);
     const connection = getConnection();
 
-    connection.query("INSERT INTO Reservations (StudentID, RouteID, BusID, SeatID) VALUES (?, ?, ?, ?)", [token.userID, reservationInfo.RouteID, reservationInfo.BusID, reservationInfo.SeatID], (error, results) => {
+    connection.query("INSERT INTO Reservations (StudentID, RouteID, BusID, SeatID, Day) VALUES (?, ?, ?, ?, ?)", [token.userID, reservationInfo.RouteID, reservationInfo.BusID, reservationInfo.SeatID, day], (error, results) => {
         if(error) {
             console.error(error);
             connection.end();
@@ -37,7 +39,7 @@ exports.getReservation = async(req, res, next) => {
     try {
         const currentDate = timeCtr.getKorTime();  // 현재 시간(yyyy-mm-dd hh:mm:tt)
         const currentTime = currentDate.slice(11,19); // 현재 시간(hh:mm:tt)
-        const nextDate = timeCtr.AddDay();  // 내일 시간(yyyy-mm-dd)
+        const nextDate = timeCtr.AddDay();  // 내일 날짜(yyyy-mm-dd)
         const lastTime = "18:40:00"; // 배차 종료시간
         var day;
 
@@ -74,5 +76,19 @@ exports.getReservation = async(req, res, next) => {
 };
 
 
+const selectDay = () => {
+    const currentDate = timeCtr.getKorTime();  // 현재 시간(yyyy-mm-dd hh:mm:tt)
+    const currentTime = currentDate.slice(11,19); // 현재 시간(hh:mm:tt)
+    const nextDate = timeCtr.AddDay();  // 내일 날짜(yyyy-mm-dd)
+    const lastTime = "18:40:00"; // 배차 종료시간
+    var day;
 
+    // 현재시간 > 마지막 배차시간 => 다음날 Reservation.Day로 확인
+    if(currentTime > lastTime) {
+        day = nextDate;
+    } else if(currentTime <= lastTime) { // 현재시간 < 마지막 배차시간 => 오늘 Reservation.Day로 확인
+        day = currentDate.slice(0, 10);
+    }
+    return day;
+}
 
