@@ -1,6 +1,7 @@
 const getConnection = require('../config/dbConfig');
 const authReq = require('../utils/authReq');
 const timeCtr = require('../utils/koreanTime');
+const util = require('util');
 
 // 예약 생성
 exports.makeReservation = async(req, res, next) => {
@@ -13,6 +14,7 @@ exports.makeReservation = async(req, res, next) => {
     var day = selectDay();
     day = day + " " + reservationInfo.timeTable; 
     console.log(day);
+
     const connection = getConnection();
 
     connection.query("INSERT INTO Reservations (StudentID, RouteID, BusID, SeatID, Day) VALUES (?, ?, ?, ?, ?)", [token.userID, reservationInfo.RouteID, reservationInfo.BusID, reservationInfo.SeatID, day], (error, results) => {
@@ -22,8 +24,29 @@ exports.makeReservation = async(req, res, next) => {
             return res.status(500).send({ message: '예약 중 오류가 발생했습니다.' });
         }
         console.log("예약 정보 생성 완료");
+        connection.end();
         return res.status(201).send({message: '예약이 완료되었습니다.'});
     });
+
+    // Pool 사용시 사용함수
+
+    // getConnection((err, connection) => {
+    //     if (err) {
+    //         console.error('Error getting connection: ', err);
+    //         return;
+    //     }
+    //     connection.query("INSERT INTO Reservations (StudentID, RouteID, BusID, SeatID, Day) VALUES (?, ?, ?, ?, ?)", [token.userID, reservationInfo.RouteID, reservationInfo.BusID, reservationInfo.SeatID, day], (error, results, fields) => {
+    //         connection.release(); // 연결을 연결 풀로 반환
+
+    //         if (error) {
+    //             console.error('Query error: ', error);
+    //             return res.status(500).send({ message: '예약 중 오류가 발생했습니다.'});
+    //         }
+
+    //         console.log("예약정보 생성 완료");
+    //         return res.status(201).send({message: '예약이 완료되었습니다.'});
+    //     });
+    // });
 };
 
 
@@ -37,21 +60,9 @@ exports.getReservation = async(req, res, next) => {
     }
 
     try {
-        const currentDate = timeCtr.getKorTime();  // 현재 시간(yyyy-mm-dd hh:mm:tt)
-        const currentTime = currentDate.slice(11,19); // 현재 시간(hh:mm:tt)
-        const nextDate = timeCtr.AddDay();  // 내일 날짜(yyyy-mm-dd)
-        const lastTime = "18:40:00"; // 배차 종료시간
-        var day;
+        var day = selectDay();
 
-        // 현재시간 > 마지막 배차시간 => 다음날 Reservation.Day로 확인
-        if(currentTime > lastTime) {
-            day = nextDate;
-        }
-        // 현재시간 < 마지막 배차시간 => 오늘 Reservation.Day로 확인
-        if(currentTime <= lastTime) {
-            day = currentDate.slice(0, 10);
-        }
-        connection.query("SELECT * FROM Reservations WHERE StudentID = ? AND INSTR(Day, ?) ORDER BY Day ASC LIMIT 1", [token.userID, day], async(err, results) => {
+        connection.query("SELECT * FROM Reservations INNER JOIN Routes ON Routes.RouteID = Reservations.RouteID WHERE StudentID = ? AND INSTR(Day, ?) ORDER BY Day ASC LIMIT 1", [token.userID, day], async(err, results) => {
             if (err){
                 console.error(err);
                 throw err;
@@ -90,5 +101,6 @@ const selectDay = () => {
         day = currentDate.slice(0, 10);
     }
     return day;
-}
+};
+
 

@@ -125,6 +125,7 @@ const QRCodeScreen = ({ navigation }) => {
         <Text style={styles.userInfo}>예약 여부: {isReserved ? 'Yes' : 'No'}</Text>
         {isReserved && reservationInfo && (
           <>
+            <Text style={styles.userInfo}>예약 노선: {reservationInfo.Name}</Text>
             <Text style={styles.userInfo}>예약 시간: {reservationInfo.timeTable}</Text>
             <Text style={styles.userInfo}>예약 좌석: {reservationInfo.SeatID}</Text>
           </>

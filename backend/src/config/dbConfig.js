@@ -6,9 +6,10 @@ const dbConfig = {
     host: "localhost",
     password: "335276",
     database: "shuttle_bus",
+    connectionLimit: 10,
 };
 
-// 데이터베이스 연결을 생성하는 함수
+//데이터베이스 연결을 생성하는 함수
 const getConnection = () => {
     const connection = mysql.createConnection(dbConfig);
     connection.connect(error => {
@@ -22,3 +23,16 @@ const getConnection = () => {
 };
 
 module.exports = getConnection;
+
+// pool 사용시 module.exports ={getConnection}; 으로 변경할것
+
+// const pool = mysql.createPool(dbConfig);
+
+// const getConnection = (callback) => {
+//     pool.getConnection((err, connection) => {
+//         if(err) {
+//             return callback(err, null);
+//         }
+//         callback(null, connection);
+//     });
+// };
