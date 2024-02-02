@@ -107,7 +107,16 @@ const ReservationScreen =  ({ navigation }) => {
             Alert.alert('예약 완료 되었습니다.');
             getSeats(reservationInfo.Name, canReserve);
         }catch (error) {
-            console.error('실패:', error);
+             if (error.response && error.response.status === 409) {
+                // 서버에서 전달한 메시지를 활용
+                const errorMessage = error.response.data.message;
+                console.error('실패:', errorMessage);
+                Alert.alert(errorMessage);
+            } else {
+                // 그 외의 에러 처리
+                console.error('예약 실패:', error);
+                Alert.alert('예약 과정에서 오류가 발생했습니다.');
+            }
         }
     };
 

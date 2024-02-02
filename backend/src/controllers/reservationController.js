@@ -17,12 +17,21 @@ exports.makeReservation = async(req, res, next) => {
 
     const connection = getConnection();
 
-    connection.query("INSERT INTO Reservations (StudentID, RouteID, BusID, SeatID, Day) VALUES (?, ?, ?, ?, ?)", [token.userID, reservationInfo.RouteID, reservationInfo.BusID, reservationInfo.SeatID, day], (error, results) => {
+    // INSERT INTO Reservations (StudentID, RouteID, BusID, SeatID, Day) SELECT * FROM (SELECT ? AS StudentID, ? AS RouteID, ? AS BusID, ? AS SeatID, ? AS Day) AS tmp WHERE NOT EXISTS (SELECT 1 FROM Reservations WHERE StudentID = tmp.StudentID AND RouteID = tmp.RouteID AND Day = tmp.Day)
+
+    // INSERT INTO Reservations (StudentID, RouteID, BusID, SeatID, Day) VALUES (?, ?, ?, ?, ?)
+    connection.query("INSERT INTO Reservations (StudentID, RouteID, BusID, SeatID, Day) SELECT * FROM (SELECT ? AS StudentID, ? AS RouteID, ? AS BusID, ? AS SeatID, ? AS Day) AS tmp WHERE NOT EXISTS (SELECT 1 FROM Reservations WHERE StudentID = tmp.StudentID AND RouteID = tmp.RouteID AND Day = tmp.Day)", [token.userID, reservationInfo.RouteID, reservationInfo.BusID, reservationInfo.SeatID, day], (error, results) => {
         if(error) {
             console.error(error);
             connection.end();
             return res.status(500).send({ message: '예약 중 오류가 발생했습니다.' });
         }
+        if (results.affectedRows === 0) {
+            console.log("중복으로 인해 예약이 추가되지 않았습니다.");
+            connection.end();
+            return res.status(409).send({message: '이미 예약이 존재합니다.'});
+        }
+
         console.log("예약 정보 생성 완료");
         connection.end();
         return res.status(201).send({message: '예약이 완료되었습니다.'});
