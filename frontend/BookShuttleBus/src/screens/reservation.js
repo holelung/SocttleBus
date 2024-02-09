@@ -123,6 +123,7 @@ const ReservationScreen =  ({ navigation }) => {
 
      // 좌석을 렌더링하는 함수 (좌석 데이터를 파라미터로 받습니다)
     const renderSeat = (seats, index, isLast) => {
+        // seats.IsReserved 가 1일때 값 입력
         const isReserved = seats.IsReserved === 1;
         const seatStyle = isReserved ? styles.reservedSeat : styles.availableSeat;
          // 4n - 2번째 좌석이면서 마지막 좌석이 아닌 경우에만 공간을 추가

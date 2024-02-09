@@ -84,7 +84,7 @@ exports.getReservation = async(req, res, next) => {
             console.log("정보 전송 성공");    
             return res.status(200).send({ results: results[0] }); 
         });
-
+        
     } catch (error) {
         console.error("서버 오류:", error);
         connection.end();

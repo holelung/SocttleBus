@@ -24,9 +24,10 @@ exports.getUser = async (req, res, next) => {
                 return res.status(401).send({ message: "유저 정보를 찾을 수 없음"});
             }
         })
-
+        
     }catch(error){
         console.error(error);
+        connection.end();
     }
 };
 

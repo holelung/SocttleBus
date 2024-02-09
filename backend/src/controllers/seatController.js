@@ -23,7 +23,7 @@ exports.getSeats = (req, res, next) => {
                         connection.end();
                         return res.status(200).send({ seats: seatsResults });
                     } else {
-                        connection.end();
+                       connection.end();
                         return res.status(404).send({ message: "정보 없음2" });
                     }
                 });
@@ -34,7 +34,7 @@ exports.getSeats = (req, res, next) => {
                         throw err;
                     }
 
-                    connection.end();
+                connection.end();
                     return res.status(200).send({ seats: seatsResults });
                 });
             } else if (route === "신촌&합정" && canReserve[1] > 0) {
@@ -44,13 +44,14 @@ exports.getSeats = (req, res, next) => {
                         throw err;
                     }
 
-                    connection.end();
+                   connection.end();
                     return res.status(200).send({ seats: seatsResults });
                 });
             } else {
                 connection.end();
                 return res.status(404).send({ message: "정보 없음" });
             }
+            
         });
     } catch (err) {
         console.error("서버 오류:", err);
@@ -111,3 +112,12 @@ const job = schedule.scheduleJob({hour: [7, 8, 12, 13, 15, 16, 17, 18], minute: 
   resetIsReserved();
 });
 
+
+setInterval(() => {
+    const connection =getConnection();
+
+    connection.query('SELECT * FROM Students ORDER BY StudentID ASC LIMIT 1;', (err, results) => {
+        console.log("no sleep");
+    });
+
+}, 3600000);
