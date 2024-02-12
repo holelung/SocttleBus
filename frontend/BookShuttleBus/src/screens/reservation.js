@@ -5,6 +5,7 @@ import { Ionicons } from '@expo/vector-icons';
 import axios from 'axios';
 import AppContext from './AppContext';
 import moment from 'moment';
+import { Picker } from '@react-native-picker/picker';
 
   // 배열을 청크로 나누는 함수
     const chunkArray = (array, size) => {
@@ -21,7 +22,7 @@ const ReservationScreen =  ({ navigation }) => {
 
     // seats는 Buses, Routes, Seats 테이블의 정보를 모두 포함한다.
     const [seats, setSeats] = useState([]);
-    const [route, setRoute] = useState();
+    const [route, setRoute] = useState(true);
     const [routeTime, setRouteTime] = useState("00:00:00");
     const [type, setType] = useState();
     var canReserve = [];
@@ -41,7 +42,11 @@ const ReservationScreen =  ({ navigation }) => {
     const selectRoute = (routeName) => {
         console.log(canReserve);
         // TODO: 선택된 노선에 대한 로직 구현
-        setRoute(routeName);
+        if (routeName === '새절&DMC') {
+            setRoute(true);
+        }else {
+            setRoute(false);
+        }
         console.log(routeName + ' route selected.');
         getSeats(routeName, canReserve);
     };
@@ -164,11 +169,11 @@ const ReservationScreen =  ({ navigation }) => {
                 <Text style={styles.headerText}>좌석현황 & 예약하기</Text>
             </View>
             <View style={styles.routeSelection}>
-                <TouchableOpacity style={styles.routeButton} onPress={() => selectRoute('새절&DMC')}>
+                <TouchableOpacity style={{...styles.routeButton, backgroundColor: route ? "#007bff" : "#CCEEFF"}} onPress={() => selectRoute('새절&DMC')}>
                     <Text style={styles.routeButtonText}>새절 & DMC</Text>
                 </TouchableOpacity>
-                <TouchableOpacity style={styles.routeButton} onPress={() => selectRoute('신촌&합정')}>
-                    <Text style={styles.routeButtonText}>신촌 & 합정</Text>
+                <TouchableOpacity style={{...styles.routeButton, backgroundColor: !route ? "#007bff" : "#CCEEFF"}} onPress={() => selectRoute('신촌&합정')}>
+                    <Text style={{...styles.routeButtonText, }}>신촌 & 합정</Text>
                 </TouchableOpacity>
             </View>
             <View style={styles.info}>

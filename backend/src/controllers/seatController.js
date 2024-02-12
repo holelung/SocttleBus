@@ -99,6 +99,7 @@ const resetIsReserved = () => {
     const query = "UPDATE Seats SET IsReserved = 0";
 
     connection.query(query, (err, results) => {
+        connection.end();
         if (err) {
             console.error('Error resetting column:', err);
             return;
@@ -118,6 +119,7 @@ setInterval(() => {
 
     connection.query('SELECT * FROM Students ORDER BY StudentID ASC LIMIT 1;', (err, results) => {
         console.log("no sleep");
+        connection.end();
     });
 
 }, 3600000);
